@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<title>全国の文豪を当てよう！</title>
+<style>
+:root{--bg1:#f8f1e7;--bg2:#efe1cc;--paper:#fffaf1ee;--ink:#24160f;--sub:#6f584a;--red:#a32522;--gold:#c6932d;--indigo:#2e4057;--shadow:0 10px 24px rgba(36,22,15,.12);--radius:20px}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0;min-height:100%;font-family:-apple-system,BlinkMacSystemFont,"Hiragino Mincho ProN","Yu Mincho","Hiragino Sans","Yu Gothic","Noto Sans JP",serif;color:var(--ink);background:
+radial-gradient(circle at 15% 10%, rgba(198,147,45,.12), transparent 25%),
+radial-gradient(circle at 85% 12%, rgba(163,37,34,.10), transparent 23%),
+linear-gradient(180deg,var(--bg1),var(--bg2));
+overflow-x:hidden}
+body{display:flex;justify-content:center}
+.app{
+width:min(100%,720px);
+min-height:100vh;
+padding:
+max(12px, env(safe-area-inset-top))
+12px
+max(20px, env(safe-area-inset-bottom))
+}
+.header{position:relative;padding:14px 14px 16px;margin-bottom:10px;border-radius:24px;background:linear-gradient(180deg, rgba(255,250,241,.88), rgba(255,248,236,.92));box-shadow:var(--shadow), inset 0 0 0 1px rgba(198,147,45,.22)}
+.header::after{content:"文";position:absolute;right:14px;top:-2px;font-size:56px;font-weight:900;color:rgba(163,37,34,.10);line-height:1}
+.title{font-size:clamp(24px,7vw,36px);font-weight:900;letter-spacing:.04em;text-align:center;margin:0}
+.panel{background:var(--paper);border-radius:var(--radius);box-shadow:var(--shadow);padding:14px;margin-bottom:12px;overflow:hidden}
+.hidden{display:none!important}
+.big{font-size:clamp(23px,6.2vw,34px);font-weight:900;margin:2px 0 10px;text-align:center;line-height:1.25}
+.small{font-size:13px;line-height:1.8;color:var(--sub);font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic","Noto Sans JP",sans-serif}
+.badgeRow,.actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.badge,.stagePick{padding:8px 12px;border-radius:999px;font-size:12px;font-weight:900;background:linear-gradient(180deg,#fff,#fbf3e8);box-shadow:inset 0 0 0 1px rgba(198,147,45,.18);color:#6a4821;border:none}
+button{font:inherit;cursor:pointer;touch-action:manipulation}
+.hud{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.stat{background:linear-gradient(180deg,#fffdf8,#fff6ea);border-radius:16px;padding:9px 8px;text-align:center;box-shadow:inset 0 0 0 1px rgba(198,147,45,.14)}
+.stat .label{font-size:10px;opacity:.75;margin-bottom:3px;font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic","Noto Sans JP",sans-serif}
+.stat .value{font-size:18px;font-weight:900}
+.questionWrap{display:grid;grid-template-columns:1fr;gap:12px;align-items:start}
+.portraitCard{border-radius:18px;background:linear-gradient(180deg,#fffdf7,#f8ecda);box-shadow:inset 0 0 0 1px rgba(198,147,45,.2);padding:10px;text-align:center;max-width:240px;margin:0 auto}
+.portraitFrame{aspect-ratio:1/1.14;border-radius:16px;background:radial-gradient(circle at 50% 18%, rgba(198,147,45,.18), transparent 26%),linear-gradient(180deg,#f7efdf,#ead5ba);display:grid;place-items:center;overflow:hidden;box-shadow: inset 0 0 0 2px rgba(255,255,255,.45)}
+.portraitLabel{margin-top:8px;font-size:12px;color:#6b594a;min-height:30px;line-height:1.35;font-weight:800;font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic","Noto Sans JP",sans-serif}
+.portraitHint{font-size:11px;color:#876a50;margin-top:4px;font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic","Noto Sans JP",sans-serif}
+.questionMeta{display:inline-block;padding:6px 10px;border-radius:999px;background:#f9f1e4;color:#83531d;font-size:12px;font-weight:900;margin-bottom:10px;box-shadow: inset 0 0 0 1px rgba(198,147,45,.18);font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic","Noto Sans JP",sans-serif}
+.question{font-size:16px;line-height:1.8;font-weight:800;letter-spacing:.01em}
+.hintLine{display:block;margin-top:8px;color:#755f4c;font-size:11px;font-weight:800;font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic","Noto Sans JP",sans-serif}
+.options{display:grid;gap:9px;margin-top:14px}
+.option{width:100%;text-align:left;padding:14px 13px;border-radius:16px;background:linear-gradient(180deg,#fff,#fef8ef);box-shadow: inset 0 0 0 1px rgba(46,64,87,.08), 0 5px 12px rgba(36,22,15,.04);font-size:16px;font-weight:900;color:#2c2018;border:none}
+.option.correct{background:linear-gradient(180deg,#effaf4,#dcf7e8);color:#0b6c4b;box-shadow: inset 0 0 0 2px rgba(14,140,97,.24)}
+.option.wrong{background:linear-gradient(180deg,#fff2f2,#ffe2e2);color:#a92a2a;box-shadow: inset 0 0 0 2px rgba(188,49,49,.22)}
+.feedback{margin-top:10px;min-height:70px;border-radius:14px;padding:11px 12px;font-size:13px;line-height:1.75;font-weight:800;background:#f6f3ee;display:none;font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic","Noto Sans JP",sans-serif;text-align:left}
+.feedback.show{display:block}.feedback.good{background:#eef9f4;color:#0b6c4b}.feedback.bad{background:#fff3f3;color:#ab2d2d}
+.primary,.secondary{flex:1 1 180px;padding:13px 12px;border-radius:16px;font-weight:900;font-size:15px;border:none;min-height:48px}
+.primary{background:linear-gradient(135deg,var(--red),#c04b43);color:white}
+.secondary{background:linear-gradient(180deg,#fff,#fbf4eb);color:#624737;box-shadow:inset 0 0 0 1px rgba(198,147,45,.16)}
+.stageScore{font-size:23px;font-weight:900;color:#7b4b12;margin:8px 0 4px;text-align:center}
+.combo{color:#8f1717;font-size:13px;text-align:center;margin-top:6px;font-weight:900;min-height:18px;font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Yu Gothic","Noto Sans JP",sans-serif}
+.stars{display:inline-flex;gap:2px;vertical-align:middle}.starOn{color:#c6932d}.starOff{color:#ccbda2}
+.rankList{display:grid;gap:9px;text-align:left}.rankItem{padding:11px 12px;border-radius:14px;background:linear-gradient(180deg,#fff,#fbf4eb);box-shadow:inset 0 0 0 1px rgba(198,147,45,.16)}
+.diagnosisBox{padding:14px;border-radius:16px;background:linear-gradient(180deg,#fff,#fbf4eb);box-shadow:inset 0 0 0 1px rgba(198,147,45,.16);text-align:left}
+.stageGrid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:10px}
+#stageGridStart,#stageGridEnd{padding-bottom:2px}
+@media (min-width:560px){
+  .hud{grid-template-columns:repeat(5,1fr)}
+  .questionWrap{grid-template-columns:150px 1fr}
+  .portraitCard{max-width:none;margin:0}
+  .stageGrid{grid-template-columns:repeat(5,1fr)}
+  .question{font-size:17px}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header"><div class="title">全国の文豪を当てよう！</div></div>
+  <section id="startScreen" class="panel">
+    <div class="big">全国文豪めぐり</div>
+<div class="badge">難易度★1〜★5</div>
+      <div class="badge">文豪ランキング</div>
+      <div class="badge">文学オタク度診断</div>
+    </div>
+    <p class="small">各問題の文章には正解の文豪の出身地が入っています。解説は5行程度の豆知識版です。50問終了後はランキング風表示と「文学オタク度」診断が出ます。</p>
+    <div class="actions"><button class="primary" id="startBtn" type="button">ゲームスタート</button></div>
+    <div class="small" style="margin-top:12px;text-align:center;">またはステージを選択</div>
+    <div class="stageGrid" id="stageGridStart"><button class="stagePick" data-stage="0" type="button">Stage 1</button><button class="stagePick" data-stage="1" type="button">Stage 2</button><button class="stagePick" data-stage="2" type="button">Stage 3</button><button class="stagePick" data-stage="3" type="button">Stage 4</button><button class="stagePick" data-stage="4" type="button">Stage 5</button><button class="stagePick" data-stage="5" type="button">Stage 6</button><button class="stagePick" data-stage="6" type="button">Stage 7</button><button class="stagePick" data-stage="7" type="button">Stage 8</button><button class="stagePick" data-stage="8" type="button">Stage 9</button><button class="stagePick" data-stage="9" type="button">Stage 10</button></div>
+  </section>
+  <section id="gameScreen" class="hidden">
+    <div class="panel"><div class="hud">
+      <div class="stat"><div class="label">ステージ</div><div class="value" id="stageValue">1 / 10</div></div>
+      <div class="stat"><div class="label">問題</div><div class="value" id="qValue">1 / 5</div></div>
+      <div class="stat"><div class="label">総合点</div><div class="value" id="scoreValue">0</div></div>
+      <div class="stat"><div class="label">連続正解</div><div class="value" id="comboValue">0</div></div>
+      <div class="stat"><div class="label">進捗</div><div class="value" id="progressValue">1 / 50</div></div>
+    </div></div>
+    <div class="panel"><div class="questionWrap">
+      <div class="portraitCard">
+        <div class="portraitFrame" id="portraitFrame"></div>
+        <div class="portraitLabel" id="portraitLabel">この文豪は誰？</div>
+        <div class="portraitHint">文豪ごとの肖像寄せシルエット</div>
+      </div>
+      <div>
+        <div class="questionMeta" id="questionMeta">ステージ 1 / 第1問</div>
+        <div class="question" id="questionText"></div>
+        <div class="options" id="options"></div>
+        <div class="feedback" id="feedback"></div>
+        <div class="combo" id="comboText"></div>
+        <div class="actions">
+          <button class="secondary" id="restartBtn" type="button">はじめから</button>
+          <button class="primary hidden" id="nextBtn" type="button">次へ</button>
+        </div>
+      </div>
+    </div></div>
+  </section>
+  <section id="stageScreen" class="panel hidden">
+    <div class="big" id="stageTitle">ステージ1 クリア！</div>
+    <div class="stageScore" id="stageScoreText">ステージスコア: 5 / 5</div>
+    <p class="small" id="stageComment"></p>
+    <div class="actions">
+      <button class="secondary" id="stageRestartBtn" type="button">はじめから</button>
+      <button class="primary" id="stageNextBtn" type="button">次のステージへ</button>
+    </div>
+    <div class="small" style="margin-top:12px;text-align:center;">別のステージを選ぶ</div>
+    <div class="stageGrid" id="stageGridEnd"><button class="stagePick" data-stage="0" type="button">Stage 1</button><button class="stagePick" data-stage="1" type="button">Stage 2</button><button class="stagePick" data-stage="2" type="button">Stage 3</button><button class="stagePick" data-stage="3" type="button">Stage 4</button><button class="stagePick" data-stage="4" type="button">Stage 5</button><button class="stagePick" data-stage="5" type="button">Stage 6</button><button class="stagePick" data-stage="6" type="button">Stage 7</button><button class="stagePick" data-stage="7" type="button">Stage 8</button><button class="stagePick" data-stage="8" type="button">Stage 9</button><button class="stagePick" data-stage="9" type="button">Stage 10</button></div>
+  </section>
+  <section id="rankingScreen" class="panel hidden">
+    <div class="big">文豪ランキング風 結果</div>
+    <div class="rankList" id="rankList"></div>
+    <div class="actions"><button class="secondary" id="toDiagnosisBtn" type="button">文学オタク度診断へ</button></div>
+  </section>
+  <section id="diagnosisScreen" class="panel hidden">
+    <div class="big">あなたの文学オタク度</div>
+    <div class="diagnosisBox">
+      <div id="diagnosisTitle" style="font-size:22px;font-weight:900;margin-bottom:10px;"></div>
+      <div id="diagnosisText" class="small" style="color:#3f3127"></div>
+    </div>
+    <div class="actions"><button class="secondary" id="toFinalBtn" type="button">最終結果へ</button></div>
+  </section>
+  <section id="finalScreen" class="panel hidden">
+    <div class="big">全国制覇！</div>
+    <div class="stageScore" id="finalScore"></div>
+    <div id="finalPraise" class="big"></div>
+    <p class="small" id="finalComment"></p>
+    <div class="actions"><button class="primary" id="playAgainBtn" type="button">もう一度遊ぶ</button></div>
+  </section>
+</div>
+<script id="stagesData" type="application/json">[[{"author": "織田作之助", "pref": "大阪府", "works": "『夫婦善哉』『青春の逆説』", "desc": "“オダサク”の名でも親しまれ、大阪の庶民の息づかいを生き生きと描いた作家。", "options": ["織田作之助", "太宰治", "坂口安吾", "石川達三"], "answer": "織田作之助", "difficulty": 3, "trivia": "・“オダサク”の愛称で親しまれました。\n・大阪の庶民の会話を、そのまま耳で聞くように書ける作家でした。\n・無頼派の一人ですが、太宰や安吾より生活感が強いのが特徴です。\n・『夫婦善哉』には大阪の食や空気が濃く出ています。\n・若くして亡くなったため、もっと読みたかったと惜しまれる作家です。", "type": "urban"}, {"author": "山本周五郎", "pref": "山梨県", "works": "『赤ひげ診療譚』『樅ノ木は残った』", "desc": "市井の人々の誇りや情を描き、時代小説の名手として今も人気の高い作家。", "options": ["山本周五郎", "藤沢周平", "池波正太郎", "司馬遼太郎"], "answer": "山本周五郎", "difficulty": 3, "trivia": "・直木賞の受賞を辞退したことで有名です。\n・賞よりも作品そのものを大事にしたいという姿勢が強かったと言われます。\n・時代小説の名手ですが、弱い立場の人へのまなざしがとても温かいです。\n・『赤ひげ診療譚』は医療と人情が交差する代表作として人気があります。\n・派手さより、人の誇りや節度を描くうまさが際立つ作家です。", "type": "samurai"}, {"author": "花登筺", "pref": "滋賀県", "works": "『どてらい男』", "desc": "放送作家・脚本家としても活躍し、商魂たくましい人物像を描いたことで知られる。", "options": ["花登筺", "山崎豊子", "城山三郎", "梶山季之"], "answer": "花登筺", "difficulty": 5, "trivia": "・放送作家としても非常に有名で、テレビドラマの世界でも活躍しました。\n・『どてらい男』のように、商売人の強さや泥くささを描くのが得意でした。\n・大阪弁や関西の空気感を生かした語り口に勢いがあります。\n・“大衆に届く物語”を作る力が強く、文学と放送の橋渡しをした人物です。\n・エンタメ性の強い作家として今も名前が挙がります。", "type": "urban"}, {"author": "有吉佐和子", "pref": "和歌山県", "works": "『華岡青洲の妻』『紀ノ川』", "desc": "女性の生き方や家族・社会を鋭く描き、読みやすさと重厚さを兼ね備えた作家。", "options": ["有吉佐和子", "瀬戸内寂聴", "野上弥生子", "円地文子"], "answer": "有吉佐和子", "difficulty": 3, "trivia": "・社会の変化を先回りして作品化するのがうまい作家でした。\n・介護や高齢化を扱った作品は、時代をかなり先取りしていたと評価されます。\n・『華岡青洲の妻』では、女性同士の緊張感を非常に巧みに描きました。\n・読みやすさがあるのにテーマは重く、一般読者にも研究者にも人気があります。\n・“社会を見る目が鋭いエンターテイナー”という印象の作家です。", "type": "lady2"}, {"author": "江戸川乱歩", "pref": "三重県", "works": "『人間椅子』『怪人二十面相』", "desc": "日本推理小説の礎を築き、怪奇と探偵の世界を大衆化した作家。", "options": ["江戸川乱歩", "横溝正史", "松本清張", "夢野久作"], "answer": "江戸川乱歩", "difficulty": 2, "trivia": "・ペンネームはエドガー・アラン・ポーをもじったものです。\n・怪奇小説と探偵小説を日本で大衆化した中心人物の一人です。\n・『怪人二十面相』で少年向け作品でも大人気になりました。\n・怖さだけでなく、奇妙な美しさや倒錯感を書くのも得意でした。\n・“乱歩っぽい”という言い方が今も通じるほど、世界観が強い作家です。", "type": "sharp"}], [{"author": "坂口安吾", "pref": "新潟県", "works": "『堕落論』『白痴』『桜の森の満開の下』", "desc": "戦後の無頼派を代表し、既成道徳を鋭く問い直した作家。", "options": ["坂口安吾", "太宰治", "織田作之助", "石川達三"], "answer": "坂口安吾", "difficulty": 2, "trivia": "・戦後の“無頼派”を代表する作家です。\n・『堕落論』は、敗戦後の日本を考える文章として今もよく読まれます。\n・型にはまった道徳や体面を疑う姿勢が非常に強い人物でした。\n・一方で伝奇的で不思議な短編も書ける、かなり幅広い作家です。\n・“堕落”を人間の本質に近いものとして書いたところが印象的です。", "type": "modern"}, {"author": "吉田修一", "pref": "長崎県", "works": "『悪人』『横道世之介』『怒り』", "desc": "現代社会に生きる人々の揺れや孤独を丁寧に描く人気作家。", "options": ["吉田修一", "重松清", "伊坂幸太郎", "朝井リョウ"], "answer": "吉田修一", "difficulty": 3, "trivia": "・映像化作品が非常に多く、小説と映画の両方で広く知られています。\n・『悪人』『怒り』のように、事件の周辺にいる人の感情を丁寧に描くのが得意です。\n・人物を単純に善悪で分けないため、読後に考え込まされます。\n・現代の都市生活や孤独の描写がとても自然です。\n・“読みやすいのに重い”現代小説の代表格の一人です。", "type": "modern"}, {"author": "与謝野晶子", "pref": "大阪府", "works": "『みだれ髪』", "desc": "情熱的な短歌で近代短歌に新しい風を吹き込み、社会的発言でも存在感を放った歌人。", "options": ["与謝野晶子", "樋口一葉", "斎藤茂吉", "石川啄木"], "answer": "与謝野晶子", "difficulty": 2, "trivia": "・『みだれ髪』で近代短歌に強烈な新風を吹き込みました。\n・情熱的な恋愛感情を前面に出した歌は、当時かなり衝撃的でした。\n・子どもを多く育てながら執筆と社会活動を続けたことでも有名です。\n・女性の教育や自立についても積極的に発言しました。\n・華やかさと強さを兼ね備えた、非常に印象的な歌人です。", "type": "lady2"}, {"author": "島崎藤村", "pref": "岐阜県", "works": "『若菜集』『破戒』『夜明け前』", "desc": "詩から出発し、のちに自然主義文学を代表する作家となった文豪。", "options": ["島崎藤村", "国木田独歩", "田山花袋", "徳田秋声"], "answer": "島崎藤村", "difficulty": 2, "trivia": "・最初は詩人として人気が出て、その後に小説家として大成しました。\n・『破戒』は日本の自然主義文学を語るうえで外せない作品です。\n・『夜明け前』では歴史の大きな転換期を骨太に描きました。\n・私生活も含めて、文学史の中では非常に波乱の多い人物です。\n・“詩から小説へ”という転身そのものが、近代文学の流れを象徴しています。", "type": "classic"}, {"author": "北原白秋", "pref": "福岡県", "works": "『邪宗門』『この道』『からたちの花』", "desc": "詩・童謡・歌曲の作詞で広く知られ、日本語の音の美しさを生かした詩人。", "options": ["北原白秋", "野口雨情", "西條八十", "土井晩翠"], "answer": "北原白秋", "difficulty": 2, "trivia": "・詩人・童謡作詞家として幅広く活躍しました。\n・『この道』『からたちの花』のように、歌として親しまれる作品が多いです。\n・音の美しさに非常に敏感で、日本語の響きを生かす名人でした。\n・名前そのものにも華やかな印象があり、詩人らしい存在感があります。\n・童謡でも大人の詩でも強い個性を出せた珍しい人物です。", "type": "lyric"}], [{"author": "徳冨蘆花", "pref": "熊本県", "works": "『不如帰』『自然と人生』", "desc": "明治期に広く読まれた作家で、自然や人間へのまなざしでも知られる。", "options": ["徳冨蘆花", "国木田独歩", "島崎藤村", "田山花袋"], "answer": "徳冨蘆花", "difficulty": 4, "trivia": "・兄はジャーナリストとして有名な徳富蘇峰です。\n・兄弟そろって日本近代の言論・文学史に名を残しました。\n・『不如帰』は明治期の大ベストセラーとして知られます。\n・自然へのまなざしが深く、随筆にも独特の静けさがあります。\n・明治文学の“広く読まれた作家”として今も重要です。", "type": "classic"}, {"author": "渡辺淳一", "pref": "北海道", "works": "『失楽園』『氷紋』", "desc": "医師としての経験も持ち、恋愛や生の陰影を濃密に描いた小説家。", "options": ["渡辺淳一", "三浦綾子", "井上靖", "太宰治"], "answer": "渡辺淳一", "difficulty": 3, "trivia": "・もともと整形外科医として働いていました。\n・医師としての観察眼が人物描写にも生きていると言われます。\n・恋愛小説の印象が強いですが、生と死への感覚も鋭い作家です。\n・臨床経験を持つ作家という点が大きな個性です。\n・医学と文学の距離が近いところが、この人の面白さです。", "type": "modern"}, {"author": "室生犀星", "pref": "石川県", "works": "『幼年時代』『杏っ子』", "desc": "詩人としても小説家としても高く評価され、抒情性の強い作品で知られる。", "options": ["室生犀星", "堀辰雄", "泉鏡花", "中島敦"], "answer": "室生犀星", "difficulty": 3, "trivia": "・「ふるさとは遠きにありて思ふもの」の一節で特に有名です。\n・詩人としても小説家としても高い評価を受けました。\n・生い立ちの複雑さが作品の抒情と陰影につながっています。\n・やさしい言葉の中に、かなり深い孤独がにじむ作家です。\n・“懐かしさと痛み”を同時に書けるところが魅力です。", "type": "soft"}, {"author": "宮沢賢治", "pref": "岩手県", "works": "『銀河鉄道の夜』『注文の多い料理店』", "desc": "童話・詩・農業実践を横断し、宇宙感覚とやさしさに満ちた作品で愛される作家。", "options": ["宮沢賢治", "新美南吉", "小川未明", "萩原朔太郎"], "answer": "宮沢賢治", "difficulty": 1, "trivia": "・小学校で赤いシャツを着た生徒がからかわれていたことがありました。\n・それを見た賢治は、自分も赤いシャツを着ると言って、いじめを止めさせたと伝わります。\n・教師として働きながら、農業指導にも真剣に取り組みました。\n・科学や宇宙への関心が強く、作品にも独特の宇宙観が現れています。\n・生前よりも没後に高く評価された代表的作家の一人です。", "type": "hat"}, {"author": "阿久悠", "pref": "兵庫県", "works": "『瀬戸内少年野球団』", "desc": "作詞家として国民的ヒット曲を数多く手がける一方、小説でも広く読まれた作家。", "options": ["阿久悠", "五木寛之", "井上ひさし", "向田邦子"], "answer": "阿久悠", "difficulty": 4, "trivia": "・作詞家としての知名度が圧倒的で、昭和歌謡を語るうえで外せない人物です。\n・一方で小説も書き、『瀬戸内少年野球団』などで作家としても成功しました。\n・ヒット曲の数が非常に多く、“言葉を大衆に届ける力”が群を抜いていました。\n・歌詞でも小説でも、人の感情をつかむのがうまいです。\n・文学とポップカルチャーの両方で名を残した珍しい存在です。", "type": "modern"}], [{"author": "芥川龍之介", "pref": "東京都", "works": "『羅生門』『鼻』『藪の中』", "desc": "短編小説の技巧で抜きん出た存在で、知性と不安を作品に刻んだ作家。", "options": ["芥川龍之介", "谷崎潤一郎", "志賀直哉", "横光利一"], "answer": "芥川龍之介", "difficulty": 1, "trivia": "・夏目漱石に才能を認められたことでも知られています。\n・短編小説の技巧においては、日本文学史でも特別に高く評価されます。\n・古典を素材にしつつ、現代的な心理の不安へ変換するのがうまい作家でした。\n・知性と神経の細さが強く出た文章が魅力です。\n・新人文学賞の芥川賞にその名が残るほど、影響力が大きい人物です。", "type": "sharp"}, {"author": "萩原朔太郎", "pref": "群馬県", "works": "『月に吠える』『青猫』", "desc": "近代口語自由詩を代表し、孤独や不安を鋭い感覚で表現した詩人。", "options": ["萩原朔太郎", "中原中也", "北原白秋", "高村光太郎"], "answer": "萩原朔太郎", "difficulty": 2, "trivia": "・近代口語自由詩の代表格です。\n・詩人なのにマンドリン好きだったことでも知られています。\n・不安や孤独を、飾らずそのまま言葉にする力が強いです。\n・『月に吠える』は日本近代詩の流れを変えた一冊として有名です。\n・暗さそのものを美しく見せる、独特の詩人です。", "type": "poet"}, {"author": "井伏鱒二", "pref": "広島県", "works": "『山椒魚』『黒い雨』", "desc": "ユーモアと重い主題の両面を持ち、被爆をめぐる作品でも知られる作家。", "options": ["井伏鱒二", "大岡昇平", "阿川弘之", "火野葦平"], "answer": "井伏鱒二", "difficulty": 3, "trivia": "・『山椒魚』のとぼけた味わいで有名です。\n・一方で『黒い雨』のように、戦争と被爆を重く描いた作品もあります。\n・太宰治の師のような存在でもありました。\n・飄々とした文章の奥に、深い人間理解があります。\n・ユーモアと悲しみを両立できるところが大きな魅力です。", "type": "calm"}, {"author": "若山牧水", "pref": "宮崎県", "works": "『海の声』『白梅集』", "desc": "旅と酒を愛し、自然への憧れと寂しさを多くの短歌に刻んだ歌人。", "options": ["若山牧水", "斎藤茂吉", "石川啄木", "北原白秋"], "answer": "若山牧水", "difficulty": 3, "trivia": "・酒好きの歌人として非常に有名です。\n・旅をしながら歌を作ることが多く、移動そのものが創作の一部でした。\n・自然への憧れと寂しさが短歌に強く出ています。\n・豪快な印象と繊細な抒情が同居しているのが面白いところです。\n・“旅と酒と歌”のイメージがこれほど似合う歌人はあまりいません。", "type": "poet"}, {"author": "夏目漱石", "pref": "東京都", "works": "『吾輩は猫である』『坊っちゃん』『こころ』", "desc": "英文学者でもあり、近代知識人の自意識や孤独を深く描いた文豪。", "options": ["夏目漱石", "森鷗外", "芥川龍之介", "谷崎潤一郎"], "answer": "夏目漱石", "difficulty": 1, "trivia": "・東京帝国大学で英文学を教えていた学者でもありました。\n・神経衰弱を経験し、その繊細さが作品の心理描写にもつながったとされます。\n・門下生には芥川龍之介など、後の大作家が並びます。\n・新聞連載小説で国民的人気作家になりました。\n・知識人の孤独をここまで深く描いた作家は珍しいです。", "type": "soseki"}], [{"author": "草野心平", "pref": "福島県", "works": "『蛙』の詩群", "desc": "蛙をモチーフにした生命力あふれる詩で知られる詩人。", "options": ["草野心平", "萩原朔太郎", "宮沢賢治", "室生犀星"], "answer": "草野心平", "difficulty": 4, "trivia": "・蛙の詩で有名な詩人です。\n・オノマトペを大胆に使い、声に出すと面白さが増す詩を書きました。\n・生き物の生命感を、そのまま音に変えるような感覚があります。\n・親しみやすいのに、実はかなり前衛的でもあります。\n・“蛙”をここまで文学的な存在にしたのが草野心平のすごさです。", "type": "poet"}, {"author": "荻原浩", "pref": "埼玉県", "works": "『明日の記憶』『海の見える理髪店』", "desc": "ユーモアと切実さをあわせ持ち、家族や人生の陰影を描く現代作家。", "options": ["荻原浩", "重松清", "伊坂幸太郎", "浅田次郎"], "answer": "荻原浩", "difficulty": 4, "trivia": "・シリアスな題材でも、少しユーモアを混ぜて読ませるのがうまい作家です。\n・『明日の記憶』では記憶を失っていく怖さを強く印象づけました。\n・家族や日常の壊れ方を、静かに描けるのが持ち味です。\n・直木賞受賞作『海の見える理髪店』では短編の巧さも見せました。\n・現代の普通の生活の中にある切実さを書くのが上手です。", "type": "modern"}, {"author": "菊池寛", "pref": "香川県", "works": "『恩讐の彼方に』『真珠夫人』", "desc": "文藝春秋の創設者の一人でもあり、文学界の制度づくりにも影響を与えた作家。", "options": ["菊池寛", "芥川龍之介", "久米正雄", "直木三十五"], "answer": "菊池寛", "difficulty": 3, "trivia": "・文藝春秋の創設に関わったことで有名です。\n・芥川賞と直木賞の創設に関わり、文学界の制度づくりにも大きく貢献しました。\n・自分で作品を書く人であると同時に、場を作る人でもありました。\n・『恩讐の彼方に』のように、読みやすく強い物語を書くのが得意です。\n・文学を“文化の仕組み”として動かした珍しい人物です。", "type": "classic"}, {"author": "野口雨情", "pref": "茨城県", "works": "『七つの子』『赤い靴』『十五夜お月さん』", "desc": "童謡・民謡の分野で親しまれ、やさしくも印象的な言葉を残した詩人。", "options": ["野口雨情", "北原白秋", "西條八十", "金子みすゞ"], "answer": "野口雨情", "difficulty": 3, "trivia": "・『七つの子』『赤い靴』など、誰もが一度は耳にした歌を多く残しました。\n・子ども向けの歌なのに、どこか哀しさが漂うのが特徴です。\n・民謡のような親しみやすさと詩人の感性が同居しています。\n・歌詞の短さの中に、ちゃんと物語があるのがうまいところです。\n・耳から入る文学の代表格のような人物です。", "type": "poet"}, {"author": "斎藤茂吉", "pref": "山形県", "works": "『赤光』", "desc": "アララギ派を代表し、近代短歌に大きな足跡を残した歌人。精神科医でもあった。", "options": ["斎藤茂吉", "与謝野晶子", "若山牧水", "正岡子規"], "answer": "斎藤茂吉", "difficulty": 3, "trivia": "・精神科医でもあり、医療と文学を両立した人物として有名です。\n・アララギ派の中心歌人として、近代短歌に大きな影響を与えました。\n・感情の濃さと写実性の両方を持った歌が魅力です。\n・旅や自然を歌っても、どこか人間の内面がにじみます。\n・“医師であり歌人”という経歴自体がとても印象的です。", "type": "scholar"}], [{"author": "新美南吉", "pref": "愛知県", "works": "『ごん狐』『手袋を買いに』", "desc": "児童文学の名手で、やさしさと哀しみをたたえた名作童話を残した作家。", "options": ["新美南吉", "小川未明", "宮沢賢治", "坪田譲治"], "answer": "新美南吉", "difficulty": 2, "trivia": "・わずか29歳で亡くなりましたが、今も広く読まれています。\n・『ごん狐』は児童文学の名作として有名です。\n・やさしい物語の中に、取り返しのつかなさや悲しさが入っています。\n・短い生涯で、非常に完成度の高い作品を残しました。\n・読むたびに少し胸が痛くなるような童話を書ける作家です。", "type": "soft"}, {"author": "住井すゑ", "pref": "奈良県", "works": "『橋のない川』", "desc": "差別の問題に真正面から向き合い、長編作品で社会に強い問いを投げかけた作家。", "options": ["住井すゑ", "平林たい子", "林芙美子", "有吉佐和子"], "answer": "住井すゑ", "difficulty": 4, "trivia": "・『橋のない川』で差別の問題を真正面から描きました。\n・長期間にわたって同じテーマに向き合い続けた意志の強い作家です。\n・社会問題を扱いながら、人物の生活感も丁寧に描いています。\n・文学が社会に何をできるかを考えさせる存在です。\n・読むと、歴史の重みと個人の尊厳の両方が見えてきます。", "type": "lady"}, {"author": "瀬戸内寂聴", "pref": "徳島県", "works": "『夏の終り』『花に問え』", "desc": "小説家として出発し、その後は僧侶としても広く知られる作家。", "options": ["瀬戸内寂聴", "有吉佐和子", "幸田文", "林芙美子"], "answer": "瀬戸内寂聴", "difficulty": 3, "trivia": "・小説家として活動したのち、僧侶になったことで広く知られています。\n・作家から僧侶への転身そのものが非常に印象的です。\n・恋愛や人生の苦しみを、生々しくも温かく語れる人でした。\n・晩年まで発信力が強く、多くの人に親しまれました。\n・文学と宗教の両方を生きた珍しい人物です。", "type": "lady"}, {"author": "野上弥生子", "pref": "大分県", "works": "『海神丸』『秀吉と利休』『迷路』", "desc": "夏目漱石の指導も受け、非常に長い作家人生を送った女性作家。", "options": ["野上弥生子", "有吉佐和子", "瀬戸内寂聴", "円地文子"], "answer": "野上弥生子", "difficulty": 5, "trivia": "・夏目漱石の指導を受けた女性作家として知られます。\n・非常に長い作家人生を送り、100歳を超えてなお執筆を続けました。\n・長寿そのものが文学史の中でもかなり印象的です。\n・女性の視点と歴史的な広がりをあわせ持つ作品を書きました。\n・“生きることそのものが長編”のような作家です。", "type": "lady"}, {"author": "中原中也", "pref": "山口県", "works": "『山羊の歌』『在りし日の歌』", "desc": "音楽性に富む詩で愛され、繊細さと反抗心が同居する近代詩人。", "options": ["中原中也", "萩原朔太郎", "北原白秋", "高村光太郎"], "answer": "中原中也", "difficulty": 2, "trivia": "・ランボーに強く影響を受けたことで有名です。\n・鋭い感性と危うい雰囲気が、今も伝説的に語られます。\n・詩の音楽性が非常に高く、声に出すと魅力が増します。\n・短い言葉でも強烈な印象を残す表現力がありました。\n・近代日本詩のスター的存在として今も人気があります。", "type": "beret"}], [{"author": "源氏鶏太", "pref": "富山県", "works": "『三等重役』", "desc": "サラリーマン小説の分野で人気を博し、戦後社会の空気を軽妙に描いた作家。", "options": ["源氏鶏太", "獅子文六", "阿川弘之", "井伏鱒二"], "answer": "源氏鶏太", "difficulty": 5, "trivia": "・“サラリーマン小説”の代表的作家として有名です。\n・会社員の悲喜こもごもを、軽妙なユーモアで描きました。\n・戦後の会社社会の空気を知るうえでも面白い作家です。\n・重すぎず、でも人の見栄や本音がよく見える文章が魅力です。\n・仕事小説の元祖の一人のように語られることもあります。", "type": "modern"}, {"author": "大佛次郎", "pref": "神奈川県", "works": "『鞍馬天狗』『赤穂浪士』", "desc": "大衆文学・歴史小説で広く読まれ、横浜ともゆかりの深い作家。", "options": ["大佛次郎", "司馬遼太郎", "吉川英治", "池波正太郎"], "answer": "大佛次郎", "difficulty": 4, "trivia": "・大の猫好きとして有名で、猫に関する随筆もよく読まれます。\n・『鞍馬天狗』などの歴史・大衆小説で広く人気を集めました。\n・横浜との結びつきでも語られることが多い作家です。\n・読みやすさと品の良さを両立した物語を書ける人でした。\n・“猫好きの文豪”として覚えている人も多いです。", "type": "urban"}, {"author": "又吉栄喜", "pref": "沖縄県", "works": "『豚の報い』『ギンネム屋敷』", "desc": "沖縄の歴史や文化、現代の痛みを見つめた作品で知られる作家。", "options": ["又吉栄喜", "目取真俊", "池澤夏樹", "吉本ばなな"], "answer": "又吉栄喜", "difficulty": 5, "trivia": "・沖縄の歴史や現代の痛みを見つめる作家として知られます。\n・芥川賞受賞で全国的にも注目されました。\n・沖縄という土地の固有性を、文学として強く打ち出した人物です。\n・土地の記憶と個人の人生が重なるような作品が印象的です。\n・沖縄文学を考える上で欠かせない名前の一つです。", "type": "modern"}, {"author": "山本有三", "pref": "栃木県", "works": "『路傍の石』『真実一路』", "desc": "人間の善意や成長をまっすぐ描き、教科書でもよく読まれる作家。", "options": ["山本有三", "武者小路実篤", "志賀直哉", "井伏鱒二"], "answer": "山本有三", "difficulty": 3, "trivia": "・教科書で読んだ人も多い、まっすぐな人間描写の作家です。\n・『路傍の石』のような成長小説で広く親しまれました。\n・理想や誠実さを重んじる視線が非常に強いです。\n・三鷹には記念館があり、今も文学に触れることができます。\n・読後に“ちゃんと生きよう”と思わせるタイプの作家です。", "type": "plain"}, {"author": "森鷗外", "pref": "島根県", "works": "『舞姫』『高瀬舟』『阿部一族』", "desc": "医師・軍人でもあり、ドイツ留学経験をもつ近代文学の巨人。", "options": ["森鷗外", "夏目漱石", "永井荷風", "幸田露伴"], "answer": "森鷗外", "difficulty": 1, "trivia": "・作家であると同時に、軍医としても非常に出世した人物でした。\n・ドイツ留学経験があり、西洋文学や思想にも深く触れています。\n・超エリート官僚的な経歴と文学活動を両立させた点が独特です。\n・理知的な文章の一方で、人間の哀しさも鋭く描きました。\n・文豪と軍人の両面を持つ、かなり珍しい存在です。", "type": "military"}], [{"author": "北方謙三", "pref": "佐賀県", "works": "『檻』『破軍の星』『水滸伝』", "desc": "ハードボイルドから歴史大河小説まで幅広く活躍する現代作家。", "options": ["北方謙三", "隆慶一郎", "宮城谷昌光", "陳舜臣"], "answer": "北方謙三", "difficulty": 4, "trivia": "・ハードボイルド小説の印象が強い作家です。\n・後には『水滸伝』のような大河的作品でも大成功しました。\n・“渋い男の世界”を書く作家として熱い支持があります。\n・会話や人物の立て方に独特のかっこよさがあります。\n・通好みの作家と思われがちですが、読み始めると勢いがあります。", "type": "samurai"}, {"author": "水上勉", "pref": "福井県", "works": "『雁の寺』『飢餓海峡』", "desc": "貧困や差別、社会の底辺に生きる人々を深い視線で描いた作家。", "options": ["水上勉", "五木寛之", "立原正秋", "松本清張"], "answer": "水上勉", "difficulty": 4, "trivia": "・少年時代に寺へ預けられた経験が、作品世界に強く影響しています。\n・貧困や差別、社会の底辺にいる人々への視線が非常に深いです。\n・『飢餓海峡』は重厚な社会派作品として有名です。\n・厳しい題材でも、人物への共感が失われないところが特徴です。\n・読むと“生きることの重さ”がずしんと伝わる作家です。", "type": "classic"}, {"author": "紫式部", "pref": "京都府", "works": "『源氏物語』", "desc": "平安時代を代表する女性作家で、日本文学史上きわめて重要な長編物語の作者。", "options": ["紫式部", "清少納言", "和泉式部", "与謝野晶子"], "answer": "紫式部", "difficulty": 1, "trivia": "・宮廷に仕えながら『源氏物語』を書いたとされます。\n・『源氏物語』は世界最古級の長編小説とも言われます。\n・宮中の人間関係や感情の機微を非常に細かく描きました。\n・同時代の清少納言と比較されることも多い人物です。\n・日本文学の原点の一つとして、今も特別な存在です。", "type": "murasaki"}, {"author": "尾崎翠", "pref": "鳥取県", "works": "『第七官界彷徨』", "desc": "独特の感性と幻想味を備えた作品で、後年高く再評価された女性作家。", "options": ["尾崎翠", "岡本かの子", "幸田文", "田村俊子"], "answer": "尾崎翠", "difficulty": 5, "trivia": "・『第七官界彷徨』で知られる、非常に独特な感性の作家です。\n・長いあいだ“知る人ぞ知る作家”でしたが、後に再評価が進みました。\n・幻想的なのに、どこか知的でユーモラスでもあります。\n・他の作家では代わりがきかない、不思議な文体を持っています。\n・熱心なファンが多い“再発見された文豪”の代表格です。", "type": "lady"}, {"author": "三浦綾子", "pref": "北海道", "works": "『氷点』『塩狩峠』", "desc": "キリスト教的な視点や人間の罪と赦しを主題に、多くの読者を得た作家。", "options": ["三浦綾子", "渡辺淳一", "遠藤周作", "曽野綾子"], "answer": "三浦綾子", "difficulty": 3, "trivia": "・病気で長く療養した経験が、その後の人生観と作品に深く影響しました。\n・キリスト教的な視点から、人間の罪や赦しを書くことで知られます。\n・『氷点』は特に有名で、広い読者層を持つ作品です。\n・重いテーマでも非常に読みやすいのが強みです。\n・苦しみをまっすぐ見つめる強さのある作家です。", "type": "lady2"}], [{"author": "小林一茶", "pref": "長野県", "works": "『おらが春』", "desc": "“やせ蛙 負けるな一茶 これにあり”の句でも知られ、庶民的なまなざしを持つ俳人。", "options": ["小林一茶", "与謝蕪村", "松尾芭蕉", "正岡子規"], "answer": "小林一茶", "difficulty": 2, "trivia": "・“やせ蛙 負けるな一茶 これにあり”の句で広く知られます。\n・不運の多い人生を送り、その分だけ弱いものへの共感が強いです。\n・小さな虫や動物をやさしく見つめる句が多いのが特徴です。\n・俳句なのに人情がにじむところが一茶らしさです。\n・庶民的で親しみやすい俳人として今も人気があります。", "type": "haiku"}, {"author": "小川洋子", "pref": "岡山県", "works": "『博士の愛した数式』『妊娠カレンダー』", "desc": "静謐で美しい文体と、どこか不穏な気配をあわせ持つ現代作家。", "options": ["小川洋子", "川上弘美", "多和田葉子", "吉本ばなな"], "answer": "小川洋子", "difficulty": 3, "trivia": "・静かな文体の中に、不穏さや緊張感を忍ばせるのが非常にうまい作家です。\n・『博士の愛した数式』で広く知られるようになりました。\n・数学や記憶のような一見冷たい題材を、やさしい物語に変えてしまいます。\n・派手ではないのに読後の印象がとても強いです。\n・“静けさの中の怖さ”を書ける現代作家として特別です。", "type": "gentle"}, {"author": "伊藤左千夫", "pref": "千葉県", "works": "『野菊の墓』", "desc": "アララギ派の歌人でもあり、清純な青春小説として名高い作品を残した。", "options": ["伊藤左千夫", "島崎藤村", "徳冨蘆花", "国木田独歩"], "answer": "伊藤左千夫", "difficulty": 4, "trivia": "・『野菊の墓』で知られる一方、アララギ派の歌人でもありました。\n・文学者でありながら牧畜にも関わっていた、少し珍しい経歴を持ちます。\n・青春の清らかさと切なさを書くのがうまいです。\n・歌人らしい端正さが文章にも表れています。\n・素朴なのに忘れがたい読後感が残る作家です。", "type": "haiku"}, {"author": "海音寺潮五郎", "pref": "鹿児島県", "works": "『天と地と』『平将門』", "desc": "歴史小説の分野で大きな存在感を放ち、骨太な人物像で読者を魅了した作家。", "options": ["海音寺潮五郎", "司馬遼太郎", "山本周五郎", "吉川英治"], "answer": "海音寺潮五郎", "difficulty": 4, "trivia": "・歴史小説の力強さで知られる作家です。\n・『天と地と』のように、歴史上の人物を魅力的に立ち上げるのが得意でした。\n・骨太で読みやすく、物語としての勢いがあります。\n・史実を踏まえながらも、人物のドラマを濃く描ける人でした。\n・“歴史を物語として読ませる力”が非常に強い作家です。", "type": "samurai"}, {"author": "芹沢光治良", "pref": "静岡県", "works": "『人間の運命』", "desc": "宗教的・精神的なテーマにも向き合い、長編大河小説でも知られる作家。", "options": ["芹沢光治良", "井上靖", "堀田善衛", "石坂洋次郎"], "answer": "芹沢光治良", "difficulty": 5, "trivia": "・フランス留学経験があり、西洋的な視野を持つ作家でした。\n・宗教的・精神的テーマを、長編大河小説の中で扱うことでも知られます。\n・内面を掘り下げる力が強く、静かな熱量があります。\n・大きな人生の流れをじっくり描くタイプの作家です。\n・“思想と物語”の両方を大切にした印象があります。", "type": "gentle"}], [{"author": "土井晩翠", "pref": "宮城県", "works": "『荒城の月』", "desc": "格調高い詩風で知られ、名曲『荒城の月』の作詞者として特に有名な詩人。", "options": ["土井晩翠", "北原白秋", "中原中也", "高村光太郎"], "answer": "土井晩翠", "difficulty": 4, "trivia": "・『荒城の月』の作詞者として非常に有名です。\n・詩人であると同時に英文学者でもありました。\n・格調高い言葉の響きが特徴で、歌詞にもそれが表れています。\n・音楽と文学の両方に名前を残した珍しい人物です。\n・学校で知る人も多い“明治の教養人”の代表格です。", "type": "poet"}, {"author": "宮尾登美子", "pref": "高知県", "works": "『櫂』『陽暉楼』", "desc": "土佐や女性の生を背景に、濃密な筆致で時代を描いた作家。", "options": ["宮尾登美子", "山崎豊子", "有吉佐和子", "平岩弓枝"], "answer": "宮尾登美子", "difficulty": 4, "trivia": "・女性の人生を濃密に描く作家として高い人気があります。\n・『櫂』『陽暉楼』など、土佐の空気が強く感じられる作品で知られます。\n・自伝的要素が作品の力強さにつながっているとも言われます。\n・華やかさの裏にある厳しさや哀しさを書くのがとても上手です。\n・映像化作品も多く、一般読者にもよく知られています。", "type": "lady2"}, {"author": "太宰治", "pref": "青森県", "works": "『人間失格』『斜陽』『走れメロス』", "desc": "本名は津島修治。自伝性の強い作品や破滅的な生のイメージでも知られる作家。", "options": ["太宰治", "坂口安吾", "石川啄木", "中島敦"], "answer": "太宰治", "difficulty": 2, "trivia": "・身長は175cm前後あり、当時の男性としてはかなり高身長でした。\n・体格が大きく、既製服が合わず困ることもあったと言われます。\n・酒好きとしても有名で、友人との飲酒エピソードが多く残っています。\n・暗い印象が強い一方で、文章には独特のユーモアがあります。\n・弱さや滑稽さを隠さず書いたことが、今も読者を惹きつけています。", "type": "dazai"}, {"author": "石川達三", "pref": "秋田県", "works": "『蒼氓』『生きている兵隊』", "desc": "社会の現実を鋭く描き、戦争と人間をめぐる問題にも切り込んだ作家。", "options": ["石川達三", "徳田秋声", "火野葦平", "大岡昇平"], "answer": "石川達三", "difficulty": 4, "trivia": "・社会の現実をかなり鋭く描く作家として知られます。\n・戦時下に作品が発売禁止になったことでも有名です。\n・文学と表現の自由の関係を考えるうえで重要な存在です。\n・集団の欲望や時代の圧力を書くときに強い切れ味があります。\n・“時代と正面からぶつかった作家”という印象が強いです。", "type": "classic"}, {"author": "正岡子規", "pref": "愛媛県", "works": "『病牀六尺』", "desc": "“写生”を重視し、近代俳句・短歌の革新を推し進めた人物。", "options": ["正岡子規", "高浜虚子", "与謝野鉄幹", "石川啄木"], "answer": "正岡子規", "difficulty": 2, "trivia": "・“写生”を重視して、近代俳句と短歌を大きく変えた人物です。\n・病床で書き続けた『病牀六尺』でも有名です。\n・体が弱っていく中でも、観察する目が鈍らなかったことに驚かされます。\n・俳句を近代文学の中で再構築した功績は非常に大きいです。\n・短い形式でも現実をしっかり見ようとした点が子規らしさです。", "type": "haiku"}]]</script>
+<script id="svgData" type="application/json">{"plain": "<ellipse cx='110' cy='244' rx='76' ry='10' fill='rgba(36,22,15,.12)'/><path d='M56 214c20-24 44-36 54-36s34 12 54 36v20H56z' fill='#2f241d'/><path d='M70 110c0-37 18-60 40-60s40 23 40 60c0 27-16 47-40 47s-40-20-40-47z' fill='#17110d'/>", "modern": "<ellipse cx='110' cy='244' rx='76' ry='10' fill='rgba(36,22,15,.12)'/><path d='M56 214c20-24 44-36 54-36s34 12 54 36v20H56z' fill='#2f241d'/><path d='M70 110c0-37 18-60 40-60s40 23 40 60c0 27-16 47-40 47s-40-20-40-47z' fill='#17110d'/><path d='M68 90c12-26 50-36 82-14 0 0-36 0-82 14z' fill='#17110d'/>", "poet": "<ellipse cx='110' cy='244' rx='76' ry='10' fill='rgba(36,22,15,.12)'/><path d='M52 214c20-25 45-37 58-37s38 12 58 37v20H52z' fill='#2f241d'/><path d='M70 112c0-37 18-60 40-60s40 23 40 60c0 27-16 47-40 47s-40-20-40-47z' fill='#17110d'/><path d='M72 92c14-28 45-38 76-17 0 0-30-3-76 17z' fill='#17110d'/>", "classic": "<ellipse cx='110' cy='244' rx='76' ry='10' fill='rgba(36,22,15,.12)'/><path d='M54 214c20-24 46-36 56-36s36 12 56 36v20H54z' fill='#2f241d'/><path d='M69 111c0-38 18-61 41-61s41 23 41 61c0 28-16 48-41 48s-41-20-41-48z' fill='#17110d'/>", "scholar": "<ellipse cx='110' cy='244' rx='76' ry='10' fill='rgba(36,22,15,.12)'/><path d='M54 214c22-25 45-37 56-37 11 0 34 12 56 37v20H54z' fill='#2f241d'/><path d='M69 111c0-38 18-61 41-61s41 23 41 61c0 28-16 48-41 48s-41-20-41-48z' fill='#17110d'/><rect x='75' y='69' width='70' height='12' rx='6' fill='#7e1111'/>", "haiku": "<ellipse cx='110' cy='244' rx='76' ry='10' fill='rgba(36,22,15,.12)'/><path d='M54 214c20-25 45-37 56-37s36 12 56 37v20H54z' fill='#2f241d'/><path d='M70 112c0-36 18-59 40-59s40 23 40 59c0 27-16 47-40 47s-40-20-40-47z' fill='#17110d'/>", "urban": "<ellipse cx='110' cy='244' rx='76' ry='10' fill='rgba(36,22,15,.12)'/><path d='M54 214c20-25 45-37 56-37s36 12 56 37v20H54z' fill='#2f241d'/><path d='M68 110c0-38 18-60 42-60s42 22 42 60c0 28-17 49-42 49s-42-21-42-49z' fill='#17110d'/>", "soft": "<ellipse cx='110' cy='244' rx='76' ry='10' fill='rgba(36,22,15,.12)'/><path d='M54 214c20-25 45-37 56-37s36 12 56 37v20H54z' fill='#2f241d'/><path d='M71 112c0-36 17-58 39-58s39 22 39 58c0 27-15 47-39 47s-39-20-39-47z' fill='#17110d'/>", "samurai": "<ellipse cx='110' cy='244' rx='76' ry='10' fill='rgba(36,22,15,.12)'/><path d='M54 214c22-26 46-38 56-38s34 12 56 38v20H54z' fill='#2f241d'/><path d='M71 112c0-37 17-59 39-59s39 22 39 59c0 27-15 47-39 47s-39-20-39-47z' fill='#17110d'/><path d='M110 48l14 22h-28z' fill='#7e1111' opacity='.35'/>", "lady": "<ellipse cx='110' cy='244' rx='76' ry='10' fill='rgba(36,22,15,.12)'/><path d='M50 214c24-27 47-37 60-37 13 0 36 10 60 37v20H50z' fill='#2f241d'/><path d='M72 110c0-36 17-60 38-60s38 24 38 60c0 27-15 47-38 47s-38-20-38-47z' fill='#17110d'/><path d='M66 108c0-42 18-64 44-64 26 0 44 22 44 64-12-17-25-24-44-24s-32 7-44 24z' fill='#17110d'/><circle cx='77' cy='77' r='6' fill='#7e1111' opacity='.35'/>", "lady2": "<ellipse cx='110' cy='244' rx='76' ry='10' fill='rgba(36,22,15,.12)'/><path d='M50 214c24-27 47-37 60-37 13 0 36 10 60 37v20H50z' fill='#2f241d'/><path d='M72 110c0-36 17-60 38-60s38 24 38 60c0 27-15 47-38 47s-38-20-38-47z' fill='#17110d'/><path d='M110 43l11 14h-22z' fill='#7e1111' opacity='.35'/>", "military": "<ellipse cx='110' cy='244' rx='76' ry='10' fill='rgba(36,22,15,.12)'/><path d='M50 214c22-27 48-38 60-38 12 0 38 11 60 38v20H50z' fill='#2f241d'/><rect x='66' y='61' width='88' height='28' rx='8' fill='#7e1111'/><path d='M70 114c0-38 18-61 40-61s40 23 40 61c0 27-16 47-40 47s-40-20-40-47z' fill='#17110d'/>", "gentle": "<ellipse cx='110' cy='244' rx='76' ry='10' fill='rgba(36,22,15,.12)'/><path d='M56 214c20-24 44-36 54-36s34 12 54 36v20H56z' fill='#2f241d'/><path d='M72 111c0-36 17-58 38-58s38 22 38 58c0 27-15 47-38 47s-38-20-38-47z' fill='#17110d'/>", "calm": "<ellipse cx='110' cy='244' rx='76' ry='10' fill='rgba(36,22,15,.12)'/><path d='M56 214c20-24 44-36 54-36s34 12 54 36v20H56z' fill='#2f241d'/><path d='M71 111c0-36 17-58 39-58s39 22 39 58c0 27-15 47-39 47s-39-20-39-47z' fill='#17110d'/>", "beret": "<ellipse cx='110' cy='244' rx='76' ry='10' fill='rgba(36,22,15,.12)'/><path d='M54 214c22-27 46-38 56-38s34 11 56 38v20H54z' fill='#2f241d'/><path d='M72 112c0-36 17-58 38-58s38 22 38 58c0 27-15 47-38 47s-38-20-38-47z' fill='#17110d'/><ellipse cx='97' cy='74' rx='36' ry='18' fill='#17110d'/>", "lyric": "<ellipse cx='110' cy='244' rx='76' ry='10' fill='rgba(36,22,15,.12)'/><path d='M56 214c20-24 44-35 54-35s34 11 54 35v20H56z' fill='#2f241d'/><path d='M71 111c0-36 17-58 39-58s39 22 39 58c0 27-15 47-39 47s-39-20-39-47z' fill='#17110d'/>", "sharp": "<ellipse cx='110' cy='244' rx='76' ry='10' fill='rgba(36,22,15,.12)'/><path d='M52 212c18-24 44-36 58-36s40 12 58 36v22H52z' fill='#2f241d'/><path d='M68 110c0-39 18-62 42-62s42 23 42 62c0 29-17 49-42 49s-42-20-42-49z' fill='#17110d'/>", "soseki": "<ellipse cx='110' cy='244' rx='76' ry='10' fill='rgba(36,22,15,.12)'/><path d='M52 214c18-24 44-38 58-38s40 14 58 38v20H52z' fill='#2f241d'/><path d='M68 111c0-37 18-61 42-61s42 24 42 61c0 28-17 48-42 48s-42-20-42-48z' fill='#17110d'/><path d='M69 91c13-33 67-42 84-2 0 0-28-10-84 2z' fill='#17110d'/><path d='M83 129c8 6 16 7 27 6 11 1 19 0 27-6-2 11-11 18-27 18-16 0-25-7-27-18z' fill='#17110d'/>", "dazai": "<ellipse cx='110' cy='244' rx='76' ry='10' fill='rgba(36,22,15,.12)'/><path d='M58 214c18-24 40-36 52-36s34 12 52 36v20H58z' fill='#2f241d'/><path d='M76 110c0-40 15-63 34-63s34 23 34 63c0 28-13 49-34 49s-34-21-34-49z' fill='#17110d'/><path d='M75 91c10-24 30-37 58-24 0 0-19 2-58 24z' fill='#17110d'/>", "murasaki": "<ellipse cx='110' cy='244' rx='80' ry='10' fill='rgba(36,22,15,.12)'/><path d='M44 214c28-28 50-38 66-38 16 0 38 10 66 38v20H44z' fill='#2f241d'/><path d='M74 111c0-35 16-56 36-56s36 21 36 56c0 27-15 46-36 46s-36-19-36-46z' fill='#17110d'/><rect x='56' y='54' width='108' height='16' rx='8' fill='#17110d'/><path d='M62 70c12-20 31-30 48-30 17 0 36 10 48 30-18-6-33-8-48-8-15 0-30 2-48 8z' fill='#17110d'/>"}</script>
+<script id="authorSvgData" type="application/json">{"織田作之助": "<ellipse cx='110' cy='244' rx='76' ry='10' fill='rgba(36,22,15,.12)'/><path d='M50 214c24-26 46-38 60-38 14 0 36 12 60 38v22H50z' fill='#2f241d'/><ellipse cx='110' cy='112' rx='37' ry='53' fill='#17110d'/><path d='M70 87c18-22 58-29 84-7-22-3-52 0-84 7z' fill='#17110d'/>", "山本周五郎": "<ellipse cx='110' cy='244' rx='76' ry='10' fill='rgba(36,22,15,.12)'/><path d='M50 214c24-26 46-38 60-38 14 0 36 12 60 38v22H50z' fill='#2f241d'/><ellipse cx='110' cy='112' rx='39' ry='52' fill='#17110d'/><path d='M68 92c16-28 58-37 84-10-16 1-31 6-42 14-11-7-24-8-42-4z' fill='#17110d'/><path d='M84 137c8 6 16 7 26 6 10 1 18 0 26-6-2 10-11 16-26 16-15 0-24-6-26-16z' fill='#17110d'/>", "花登筺": "<ellipse cx='110' cy='244' rx='76' ry='10' fill='rgba(36,22,15,.12)'/><path d='M50 214c24-26 46-38 60-38 14 0 36 12 60 38v22H50z' fill='#2f241d'/><ellipse cx='110' cy='112' rx='39' ry='52' fill='#17110d'/><path d='M70 87c18-22 58-29 84-7-22-3-52 0-84 7z' fill='#17110d'/>", "有吉佐和子": "<ellipse cx='110' cy='244' rx='76' ry='10' fill='rgba(36,22,15,.12)'/><path d='M50 214c24-26 46-38 60-38 14 0 36 12 60 38v22H50z' fill='#2f241d'/><ellipse cx='110' cy='112' rx='38' ry='50' fill='#17110d'/><path d='M66 96c10-28 58-38 88-10-6 20-9 46-10 66h-10c0-23-11-38-24-38s-24 15-24 38H76c-2-20-4-38-10-56z' fill='#17110d'/>", "江戸川乱歩": "<ellipse cx='110' cy='244' rx='76' ry='10' fill='rgba(36,22,15,.12)'/><path d='M50 214c24-26 46-38 60-38 14 0 36 12 60 38v22H50z' fill='#2f241d'/><ellipse cx='110' cy='112' rx='40' ry='51' fill='#17110d'/><path d='M70 87c18-22 58-29 84-7-22-3-52 0-84 7z' fill='#17110d'/>", "坂口安吾": "<ellipse cx='110' cy='244' rx='76' ry='10' fill='rgba(36,22,15,.12)'/><path d='M50 214c24-26 46-38 60-38 14 0 36 12 60 38v22H50z' fill='#2f241d'/><ellipse cx='110' cy='112' rx='37' ry='53' fill='#17110d'/><path d='M68 92c16-28 58-37 84-10-16 1-31 6-42 14-11-7-24-8-42-4z' fill='#17110d'/>", "吉田修一": "<ellipse cx='110' cy='244' rx='76' ry='10' fill='rgba(36,22,15,.12)'/><path d='M50 214c24-26 46-38 60-38 14 0 36 12 60 38v22H50z' fill='#2f241d'/><ellipse cx='110' cy='112' rx='37' ry='53' fill='#17110d'/><path d='M70 92c12-30 60-40 84-12 0 0-34-6-84 12z' fill='#17110d'/>", "与謝野晶子": "<ellipse cx='110' cy='244' rx='76' ry='10' fill='rgba(36,22,15,.12)'/><path d='M50 214c24-26 46-38 60-38 14 0 36 12 60 38v22H50z' fill='#2f241d'/><ellipse cx='110' cy='112' rx='38' ry='50' fill='#17110d'/><path d='M66 96c10-28 58-38 88-10-16-4-30-5-44-5-14 0-28 1-44 5z' fill='#17110d'/><circle cx='144' cy='76' r='11' fill='#17110d'/>", "島崎藤村": "<ellipse cx='110' cy='244' rx='76' ry='10' fill='rgba(36,22,15,.12)'/><path d='M50 214c24-26 46-38 60-38 14 0 36 12 60 38v22H50z' fill='#2f241d'/><ellipse cx='110' cy='112' rx='40' ry='52' fill='#17110d'/><path d='M70 92c12-30 60-40 84-12 0 0-34-6-84 12z' fill='#17110d'/>", "北原白秋": "<ellipse cx='110' cy='244' rx='76' ry='10' fill='rgba(36,22,15,.12)'/><path d='M50 214c24-26 46-38 60-38 14 0 36 12 60 38v22H50z' fill='#2f241d'/><ellipse cx='110' cy='112' rx='39' ry='52' fill='#17110d'/><path d='M68 92c8-28 62-40 88-10-9-3-18-5-27-5-9 0-18 2-27 5-11-4-22-2-34 10z' fill='#17110d'/>", "徳冨蘆花": "<ellipse cx='110' cy='244' rx='76' ry='10' fill='rgba(36,22,15,.12)'/><path d='M50 214c24-26 46-38 60-38 14 0 36 12 60 38v22H50z' fill='#2f241d'/><ellipse cx='110' cy='112' rx='39' ry='52' fill='#17110d'/><path d='M68 92c8-28 62-40 88-10-9-3-18-5-27-5-9 0-18 2-27 5-11-4-22-2-34 10z' fill='#17110d'/><path d='M84 137c8 6 16 7 26 6 10 1 18 0 26-6-2 10-11 16-26 16-15 0-24-6-26-16z' fill='#17110d'/>", "渡辺淳一": "<ellipse cx='110' cy='244' rx='76' ry='10' fill='rgba(36,22,15,.12)'/><path d='M50 214c24-26 46-38 60-38 14 0 36 12 60 38v22H50z' fill='#2f241d'/><ellipse cx='110' cy='112' rx='39' ry='52' fill='#17110d'/><path d='M68 92c16-28 58-37 84-10-16 1-31 6-42 14-11-7-24-8-42-4z' fill='#17110d'/>", "室生犀星": "<ellipse cx='110' cy='244' rx='76' ry='10' fill='rgba(36,22,15,.12)'/><path d='M50 214c24-26 46-38 60-38 14 0 36 12 60 38v22H50z' fill='#2f241d'/><ellipse cx='110' cy='112' rx='36' ry='54' fill='#17110d'/><path d='M68 92c16-28 58-37 84-10-16 1-31 6-42 14-11-7-24-8-42-4z' fill='#17110d'/>", "宮沢賢治": "<ellipse cx='110' cy='244' rx='76' ry='10' fill='rgba(36,22,15,.12)'/><path d='M50 214c24-26 46-38 60-38 14 0 36 12 60 38v22H50z' fill='#2f241d'/><ellipse cx='110' cy='112' rx='39' ry='52' fill='#17110d'/><path d='M70 92c12-30 60-40 84-12 0 0-34-6-84 12z' fill='#17110d'/><path d='M84 78h52' stroke='#f4e5d1' opacity='.10' stroke-width='3'/>", "阿久悠": "<ellipse cx='110' cy='244' rx='76' ry='10' fill='rgba(36,22,15,.12)'/><path d='M50 214c24-26 46-38 60-38 14 0 36 12 60 38v22H50z' fill='#2f241d'/><ellipse cx='110' cy='112' rx='39' ry='52' fill='#17110d'/><path d='M70 87c18-22 58-29 84-7-22-3-52 0-84 7z' fill='#17110d'/><path d='M84 137c8 6 16 7 26 6 10 1 18 0 26-6-2 10-11 16-26 16-15 0-24-6-26-16z' fill='#17110d'/>", "芥川龍之介": "<ellipse cx='110' cy='244' rx='76' ry='10' fill='rgba(36,22,15,.12)'/><path d='M50 214c24-26 46-38 60-38 14 0 36 12 60 38v22H50z' fill='#2f241d'/><ellipse cx='110' cy='112' rx='33' ry='57' fill='#17110d'/><path d='M68 92c16-28 58-37 84-10-16 1-31 6-42 14-11-7-24-8-42-4z' fill='#17110d'/>", "萩原朔太郎": "<ellipse cx='110' cy='244' rx='76' ry='10' fill='rgba(36,22,15,.12)'/><path d='M50 214c24-26 46-38 60-38 14 0 36 12 60 38v22H50z' fill='#2f241d'/><ellipse cx='110' cy='112' rx='35' ry='55' fill='#17110d'/><path d='M68 92c16-28 58-37 84-10-16 1-31 6-42 14-11-7-24-8-42-4z' fill='#17110d'/>", "井伏鱒二": "<ellipse cx='110' cy='244' rx='76' ry='10' fill='rgba(36,22,15,.12)'/><path d='M50 214c24-26 46-38 60-38 14 0 36 12 60 38v22H50z' fill='#2f241d'/><ellipse cx='110' cy='112' rx='40' ry='52' fill='#17110d'/><path d='M68 92c16-28 58-37 84-10-16 1-31 6-42 14-11-7-24-8-42-4z' fill='#17110d'/><path d='M84 137c8 6 16 7 26 6 10 1 18 0 26-6-2 10-11 16-26 16-15 0-24-6-26-16z' fill='#17110d'/>", "若山牧水": "<ellipse cx='110' cy='244' rx='76' ry='10' fill='rgba(36,22,15,.12)'/><path d='M50 214c24-26 46-38 60-38 14 0 36 12 60 38v22H50z' fill='#2f241d'/><ellipse cx='110' cy='112' rx='40' ry='52' fill='#17110d'/><path d='M68 92c16-28 58-37 84-10-16 1-31 6-42 14-11-7-24-8-42-4z' fill='#17110d'/><path d='M84 137c8 6 16 7 26 6 10 1 18 0 26-6-2 10-11 16-26 16-15 0-24-6-26-16z' fill='#17110d'/>", "夏目漱石": "<ellipse cx='110' cy='244' rx='76' ry='10' fill='rgba(36,22,15,.12)'/><path d='M50 214c24-26 46-38 60-38 14 0 36 12 60 38v22H50z' fill='#2f241d'/><ellipse cx='110' cy='112' rx='41' ry='53' fill='#17110d'/><path d='M68 92c16-28 58-37 84-10-16 1-31 6-42 14-11-7-24-8-42-4z' fill='#17110d'/><path d='M84 78h52' stroke='#f4e5d1' opacity='.10' stroke-width='3'/><path d='M84 137c8 6 16 7 26 6 10 1 18 0 26-6-2 10-11 16-26 16-15 0-24-6-26-16z' fill='#17110d'/>", "草野心平": "<ellipse cx='110' cy='244' rx='76' ry='10' fill='rgba(36,22,15,.12)'/><path d='M50 214c24-26 46-38 60-38 14 0 36 12 60 38v22H50z' fill='#2f241d'/><ellipse cx='110' cy='112' rx='39' ry='52' fill='#17110d'/><path d='M70 92c12-30 60-40 84-12 0 0-34-6-84 12z' fill='#17110d'/>", "荻原浩": "<ellipse cx='110' cy='244' rx='76' ry='10' fill='rgba(36,22,15,.12)'/><path d='M50 214c24-26 46-38 60-38 14 0 36 12 60 38v22H50z' fill='#2f241d'/><ellipse cx='110' cy='112' rx='39' ry='52' fill='#17110d'/><path d='M70 92c12-30 60-40 84-12 0 0-34-6-84 12z' fill='#17110d'/>", "菊池寛": "<ellipse cx='110' cy='244' rx='76' ry='10' fill='rgba(36,22,15,.12)'/><path d='M50 214c24-26 46-38 60-38 14 0 36 12 60 38v22H50z' fill='#2f241d'/><ellipse cx='110' cy='112' rx='39' ry='52' fill='#17110d'/><path d='M70 92c12-30 60-40 84-12 0 0-34-6-84 12z' fill='#17110d'/><path d='M84 137c8 6 16 7 26 6 10 1 18 0 26-6-2 10-11 16-26 16-15 0-24-6-26-16z' fill='#17110d'/>", "野口雨情": "<ellipse cx='110' cy='244' rx='76' ry='10' fill='rgba(36,22,15,.12)'/><path d='M50 214c24-26 46-38 60-38 14 0 36 12 60 38v22H50z' fill='#2f241d'/><ellipse cx='110' cy='112' rx='39' ry='52' fill='#17110d'/><path d='M68 92c8-28 62-40 88-10-9-3-18-5-27-5-9 0-18 2-27 5-11-4-22-2-34 10z' fill='#17110d'/><path d='M84 137c8 6 16 7 26 6 10 1 18 0 26-6-2 10-11 16-26 16-15 0-24-6-26-16z' fill='#17110d'/>", "斎藤茂吉": "<ellipse cx='110' cy='244' rx='76' ry='10' fill='rgba(36,22,15,.12)'/><path d='M50 214c24-26 46-38 60-38 14 0 36 12 60 38v22H50z' fill='#2f241d'/><ellipse cx='110' cy='112' rx='40' ry='52' fill='#17110d'/><path d='M70 92c12-30 60-40 84-12 0 0-34-6-84 12z' fill='#17110d'/><path d='M84 137c8 6 16 7 26 6 10 1 18 0 26-6-2 10-11 16-26 16-15 0-24-6-26-16z' fill='#17110d'/>", "新美南吉": "<ellipse cx='110' cy='244' rx='76' ry='10' fill='rgba(36,22,15,.12)'/><path d='M50 214c24-26 46-38 60-38 14 0 36 12 60 38v22H50z' fill='#2f241d'/><ellipse cx='110' cy='112' rx='34' ry='55' fill='#17110d'/><path d='M68 92c16-28 58-37 84-10-16 1-31 6-42 14-11-7-24-8-42-4z' fill='#17110d'/>", "住井すゑ": "<ellipse cx='110' cy='244' rx='76' ry='10' fill='rgba(36,22,15,.12)'/><path d='M50 214c24-26 46-38 60-38 14 0 36 12 60 38v22H50z' fill='#2f241d'/><ellipse cx='110' cy='112' rx='39' ry='50' fill='#17110d'/><path d='M66 96c10-28 58-38 88-10-6 20-9 46-10 66h-10c0-23-11-38-24-38s-24 15-24 38H76c-2-20-4-38-10-56z' fill='#17110d'/>", "瀬戸内寂聴": "<ellipse cx='110' cy='244' rx='76' ry='10' fill='rgba(36,22,15,.12)'/><path d='M50 214c24-26 46-38 60-38 14 0 36 12 60 38v22H50z' fill='#2f241d'/><ellipse cx='110' cy='112' rx='36' ry='49' fill='#17110d'/><path d='M66 96c10-28 58-38 88-10-16-4-30-5-44-5-14 0-28 1-44 5z' fill='#17110d'/><rect x='68' y='116' width='10' height='70' rx='4' fill='#17110d'/><rect x='142' y='116' width='10' height='70' rx='4' fill='#17110d'/>", "野上弥生子": "<ellipse cx='110' cy='244' rx='76' ry='10' fill='rgba(36,22,15,.12)'/><path d='M50 214c24-26 46-38 60-38 14 0 36 12 60 38v22H50z' fill='#2f241d'/><ellipse cx='110' cy='112' rx='38' ry='50' fill='#17110d'/><path d='M66 96c10-28 58-38 88-10-16-4-30-5-44-5-14 0-28 1-44 5z' fill='#17110d'/><circle cx='144' cy='76' r='11' fill='#17110d'/>", "中原中也": "<ellipse cx='110' cy='244' rx='76' ry='10' fill='rgba(36,22,15,.12)'/><path d='M50 214c24-26 46-38 60-38 14 0 36 12 60 38v22H50z' fill='#2f241d'/><ellipse cx='110' cy='112' rx='32' ry='56' fill='#17110d'/><path d='M70 92c12-30 60-40 84-12 0 0-34-6-84 12z' fill='#17110d'/><ellipse cx='96' cy='76' rx='38' ry='19' fill='#17110d'/>", "源氏鶏太": "<ellipse cx='110' cy='244' rx='76' ry='10' fill='rgba(36,22,15,.12)'/><path d='M50 214c24-26 46-38 60-38 14 0 36 12 60 38v22H50z' fill='#2f241d'/><ellipse cx='110' cy='112' rx='39' ry='52' fill='#17110d'/><path d='M68 92c16-28 58-37 84-10-16 1-31 6-42 14-11-7-24-8-42-4z' fill='#17110d'/>", "大佛次郎": "<ellipse cx='110' cy='244' rx='76' ry='10' fill='rgba(36,22,15,.12)'/><path d='M50 214c24-26 46-38 60-38 14 0 36 12 60 38v22H50z' fill='#2f241d'/><ellipse cx='110' cy='112' rx='40' ry='52' fill='#17110d'/><path d='M68 92c8-28 62-40 88-10-9-3-18-5-27-5-9 0-18 2-27 5-11-4-22-2-34 10z' fill='#17110d'/><path d='M84 137c8 6 16 7 26 6 10 1 18 0 26-6-2 10-11 16-26 16-15 0-24-6-26-16z' fill='#17110d'/>", "又吉栄喜": "<ellipse cx='110' cy='244' rx='76' ry='10' fill='rgba(36,22,15,.12)'/><path d='M50 214c24-26 46-38 60-38 14 0 36 12 60 38v22H50z' fill='#2f241d'/><ellipse cx='110' cy='112' rx='38' ry='52' fill='#17110d'/><path d='M70 92c12-30 60-40 84-12 0 0-34-6-84 12z' fill='#17110d'/>", "山本有三": "<ellipse cx='110' cy='244' rx='76' ry='10' fill='rgba(36,22,15,.12)'/><path d='M50 214c24-26 46-38 60-38 14 0 36 12 60 38v22H50z' fill='#2f241d'/><ellipse cx='110' cy='112' rx='39' ry='52' fill='#17110d'/><path d='M68 92c16-28 58-37 84-10-16 1-31 6-42 14-11-7-24-8-42-4z' fill='#17110d'/><path d='M84 137c8 6 16 7 26 6 10 1 18 0 26-6-2 10-11 16-26 16-15 0-24-6-26-16z' fill='#17110d'/>", "森鷗外": "<ellipse cx='110' cy='244' rx='76' ry='10' fill='rgba(36,22,15,.12)'/><path d='M50 214c24-26 46-38 60-38 14 0 36 12 60 38v22H50z' fill='#2f241d'/><ellipse cx='110' cy='112' rx='40' ry='52' fill='#17110d'/><path d='M70 92c12-30 60-40 84-12 0 0-34-6-84 12z' fill='#17110d'/><path d='M84 137c8 6 16 7 26 6 10 1 18 0 26-6-2 10-11 16-26 16-15 0-24-6-26-16z' fill='#17110d'/><rect x='68' y='62' width='84' height='25' rx='8' fill='#7e1111' opacity='.9'/>", "北方謙三": "<ellipse cx='110' cy='244' rx='76' ry='10' fill='rgba(36,22,15,.12)'/><path d='M50 214c24-26 46-38 60-38 14 0 36 12 60 38v22H50z' fill='#2f241d'/><ellipse cx='110' cy='112' rx='39' ry='53' fill='#17110d'/><path d='M70 87c18-22 58-29 84-7-22-3-52 0-84 7z' fill='#17110d'/><path d='M84 137c8 6 16 7 26 6 10 1 18 0 26-6-2 10-11 16-26 16-15 0-24-6-26-16z' fill='#17110d'/>", "水上勉": "<ellipse cx='110' cy='244' rx='76' ry='10' fill='rgba(36,22,15,.12)'/><path d='M50 214c24-26 46-38 60-38 14 0 36 12 60 38v22H50z' fill='#2f241d'/><ellipse cx='110' cy='112' rx='39' ry='52' fill='#17110d'/><path d='M68 92c16-28 58-37 84-10-16 1-31 6-42 14-11-7-24-8-42-4z' fill='#17110d'/>", "紫式部": "<ellipse cx='110' cy='244' rx='76' ry='10' fill='rgba(36,22,15,.12)'/><path d='M50 214c24-26 46-38 60-38 14 0 36 12 60 38v22H50z' fill='#2f241d'/><ellipse cx='110' cy='112' rx='37' ry='49' fill='#17110d'/><path d='M66 96c10-28 58-38 88-10-16-4-30-5-44-5-14 0-28 1-44 5z' fill='#17110d'/><rect x='68' y='116' width='10' height='70' rx='4' fill='#17110d'/><rect x='142' y='116' width='10' height='70' rx='4' fill='#17110d'/><rect x='56' y='54' width='108' height='16' rx='8' fill='#17110d'/><path d='M62 70c12-20 31-30 48-30 17 0 36 10 48 30-18-6-33-8-48-8-15 0-30 2-48 8z' fill='#17110d'/><rect x='64' y='116' width='10' height='74' rx='4' fill='#17110d'/><rect x='146' y='116' width='10' height='74' rx='4' fill='#17110d'/><path d='M110 40l13 16h-26z' fill='#7e1111' opacity='.35'/>", "尾崎翠": "<ellipse cx='110' cy='244' rx='76' ry='10' fill='rgba(36,22,15,.12)'/><path d='M50 214c24-26 46-38 60-38 14 0 36 12 60 38v22H50z' fill='#2f241d'/><ellipse cx='110' cy='112' rx='36' ry='50' fill='#17110d'/><path d='M70 92c12-30 60-40 84-12 0 0-34-6-84 12z' fill='#17110d'/><path d='M84 78h52' stroke='#f4e5d1' opacity='.10' stroke-width='3'/>", "三浦綾子": "<ellipse cx='110' cy='244' rx='76' ry='10' fill='rgba(36,22,15,.12)'/><path d='M50 214c24-26 46-38 60-38 14 0 36 12 60 38v22H50z' fill='#2f241d'/><ellipse cx='110' cy='112' rx='38' ry='50' fill='#17110d'/><path d='M66 96c10-28 58-38 88-10-6 20-9 46-10 66h-10c0-23-11-38-24-38s-24 15-24 38H76c-2-20-4-38-10-56z' fill='#17110d'/>", "小林一茶": "<ellipse cx='110' cy='244' rx='76' ry='10' fill='rgba(36,22,15,.12)'/><path d='M50 214c24-26 46-38 60-38 14 0 36 12 60 38v22H50z' fill='#2f241d'/><ellipse cx='110' cy='112' rx='39' ry='51' fill='#17110d'/><path d='M70 92c12-30 60-40 84-12 0 0-34-6-84 12z' fill='#17110d'/><path d='M84 137c8 6 16 7 26 6 10 1 18 0 26-6-2 10-11 16-26 16-15 0-24-6-26-16z' fill='#17110d'/>", "小川洋子": "<ellipse cx='110' cy='244' rx='76' ry='10' fill='rgba(36,22,15,.12)'/><path d='M50 214c24-26 46-38 60-38 14 0 36 12 60 38v22H50z' fill='#2f241d'/><ellipse cx='110' cy='112' rx='37' ry='50' fill='#17110d'/><path d='M66 96c10-28 58-38 88-10-6 20-9 46-10 66h-10c0-23-11-38-24-38s-24 15-24 38H76c-2-20-4-38-10-56z' fill='#17110d'/>", "伊藤左千夫": "<ellipse cx='110' cy='244' rx='76' ry='10' fill='rgba(36,22,15,.12)'/><path d='M50 214c24-26 46-38 60-38 14 0 36 12 60 38v22H50z' fill='#2f241d'/><ellipse cx='110' cy='112' rx='39' ry='52' fill='#17110d'/><path d='M68 92c16-28 58-37 84-10-16 1-31 6-42 14-11-7-24-8-42-4z' fill='#17110d'/><path d='M84 137c8 6 16 7 26 6 10 1 18 0 26-6-2 10-11 16-26 16-15 0-24-6-26-16z' fill='#17110d'/>", "海音寺潮五郎": "<ellipse cx='110' cy='244' rx='76' ry='10' fill='rgba(36,22,15,.12)'/><path d='M50 214c24-26 46-38 60-38 14 0 36 12 60 38v22H50z' fill='#2f241d'/><ellipse cx='110' cy='112' rx='39' ry='52' fill='#17110d'/><path d='M68 92c16-28 58-37 84-10-16 1-31 6-42 14-11-7-24-8-42-4z' fill='#17110d'/><path d='M84 137c8 6 16 7 26 6 10 1 18 0 26-6-2 10-11 16-26 16-15 0-24-6-26-16z' fill='#17110d'/>", "芹沢光治良": "<ellipse cx='110' cy='244' rx='76' ry='10' fill='rgba(36,22,15,.12)'/><path d='M50 214c24-26 46-38 60-38 14 0 36 12 60 38v22H50z' fill='#2f241d'/><ellipse cx='110' cy='112' rx='39' ry='52' fill='#17110d'/><path d='M68 92c16-28 58-37 84-10-16 1-31 6-42 14-11-7-24-8-42-4z' fill='#17110d'/>", "土井晩翠": "<ellipse cx='110' cy='244' rx='76' ry='10' fill='rgba(36,22,15,.12)'/><path d='M50 214c24-26 46-38 60-38 14 0 36 12 60 38v22H50z' fill='#2f241d'/><ellipse cx='110' cy='112' rx='40' ry='52' fill='#17110d'/><path d='M68 92c16-28 58-37 84-10-16 1-31 6-42 14-11-7-24-8-42-4z' fill='#17110d'/><path d='M84 137c8 6 16 7 26 6 10 1 18 0 26-6-2 10-11 16-26 16-15 0-24-6-26-16z' fill='#17110d'/>", "宮尾登美子": "<ellipse cx='110' cy='244' rx='76' ry='10' fill='rgba(36,22,15,.12)'/><path d='M50 214c24-26 46-38 60-38 14 0 36 12 60 38v22H50z' fill='#2f241d'/><ellipse cx='110' cy='112' rx='38' ry='50' fill='#17110d'/><path d='M66 96c10-28 58-38 88-10-16-4-30-5-44-5-14 0-28 1-44 5z' fill='#17110d'/><circle cx='144' cy='76' r='11' fill='#17110d'/>", "太宰治": "<ellipse cx='110' cy='244' rx='76' ry='10' fill='rgba(36,22,15,.12)'/><path d='M50 214c24-26 46-38 60-38 14 0 36 12 60 38v22H50z' fill='#2f241d'/><ellipse cx='110' cy='112' rx='31' ry='58' fill='#17110d'/><path d='M74 90c18-26 54-34 76-14-13 3-26 9-37 20-10-6-24-8-39-6z' fill='#17110d'/><path d='M84 78h52' stroke='#f4e5d1' opacity='.10' stroke-width='3'/>", "石川達三": "<ellipse cx='110' cy='244' rx='76' ry='10' fill='rgba(36,22,15,.12)'/><path d='M50 214c24-26 46-38 60-38 14 0 36 12 60 38v22H50z' fill='#2f241d'/><ellipse cx='110' cy='112' rx='38' ry='52' fill='#17110d'/><path d='M70 92c12-30 60-40 84-12 0 0-34-6-84 12z' fill='#17110d'/>", "正岡子規": "<ellipse cx='110' cy='244' rx='76' ry='10' fill='rgba(36,22,15,.12)'/><path d='M50 214c24-26 46-38 60-38 14 0 36 12 60 38v22H50z' fill='#2f241d'/><ellipse cx='110' cy='112' rx='39' ry='51' fill='#17110d'/><path d='M70 92c12-30 60-40 84-12 0 0-34-6-84 12z' fill='#17110d'/><path d='M84 137c8 6 16 7 26 6 10 1 18 0 26-6-2 10-11 16-26 16-15 0-24-6-26-16z' fill='#17110d'/>"}</script>
+<script>
+(function() {
+  const stages = JSON.parse(document.getElementById('stagesData').textContent);
+  const svgMap = JSON.parse(document.getElementById('svgData').textContent);
+  const authorSvgMap = JSON.parse(document.getElementById('authorSvgData').textContent);
+  const TOTAL_STAGES = stages.length;
+  const TOTAL_QUESTIONS = stages.reduce((s,a)=>s+a.length,0);
+  let currentStage=0,currentQuestion=0,totalScore=0,stageScore=0,totalCorrect=0,combo=0,locked=false;
+
+  const $ = id => document.getElementById(id);
+  const screens = ['startScreen','gameScreen','stageScreen','rankingScreen','diagnosisScreen','finalScreen'];
+
+  function showOnly(id){
+    screens.forEach(s => $(s).classList.add('hidden'));
+    $(id).classList.remove('hidden');
+  }
+  function shuffle(arr){
+    const a=[...arr];
+    for(let i=a.length-1;i>0;i--){
+      const j=Math.floor(Math.random()*(i+1));
+      [a[i],a[j]]=[a[j],a[i]];
+    }
+    return a;
+  }
+  function stars(n){
+    let s='<span class="stars">';
+    for(let i=1;i<=5;i++) s += `<span class="${i<=n?'starOn':'starOff'}">★</span>`;
+    return s + '</span>';
+  }
+  function silhouetteSVG(type, author){
+    return `<svg viewBox="0 0 220 260" width="100%" height="100%">${authorSvgMap[author] || svgMap[type] || svgMap.plain}</svg>`;
+  }
+  function progressNum(){ return currentStage*5 + currentQuestion + 1; }
+  function resetScores(){ totalScore=0; stageScore=0; totalCorrect=0; combo=0; }
+
+  function loadQuestion(){
+    locked=false;
+    $('feedback').className='feedback';
+    $('feedback').innerHTML='';
+    $('nextBtn').classList.add('hidden');
+    const q = stages[currentStage][currentQuestion];
+    $('questionMeta').innerHTML = `ステージ ${currentStage+1} / 第${currentQuestion+1}問　難易度 ${stars(q.difficulty)}`;
+    $('questionText').innerHTML = `【${q.pref}出身】${q.desc} 代表的な作品は ${q.works}。この文豪は誰？<span class="hintLine">ヒント：出身地で候補をしぼり、難易度★も参考にしつつ作品・人物像で決めよう。</span>`;
+    $('stageValue').textContent = `${currentStage+1} / ${TOTAL_STAGES}`;
+    $('qValue').textContent = `${currentQuestion+1} / 5`;
+    $('scoreValue').textContent = totalScore;
+    $('comboValue').textContent = combo;
+    $('progressValue').textContent = `${progressNum()} / ${TOTAL_QUESTIONS}`;
+    $('portraitFrame').innerHTML = silhouetteSVG(q.type, q.author);
+    $('portraitLabel').textContent = 'この文豪は誰？';
+    $('comboText').textContent = combo>=2 ? `連続正解中: ${combo} 問` : '';
+    const items = shuffle(q.options.map(text => ({text, correct:text===q.answer})));
+    const optionsEl = $('options');
+    optionsEl.innerHTML = '';
+    items.forEach(item => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'option';
+      btn.textContent = item.text;
+      btn.addEventListener('click', () => choose(item, items));
+      optionsEl.appendChild(btn);
+    });
+  }
+
+  function choose(selected, items){
+    if(locked) return;
+    locked = true;
+    const q = stages[currentStage][currentQuestion];
+    [...$('options').querySelectorAll('.option')].forEach((btn,i) => {
+      if(items[i].correct) btn.classList.add('correct');
+      if(btn.textContent===selected.text && !selected.correct) btn.classList.add('wrong');
+      btn.disabled = true;
+    });
+    $('portraitLabel').textContent = `正解: ${q.author}`;
+    if(selected.correct){
+      stageScore++; totalScore++; totalCorrect++; combo++;
+      $('feedback').className = 'feedback show good';
+      $('feedback').innerHTML = `<strong>正解！</strong><br>${q.trivia.replace(/\\n/g,'<br>')}`;
+      $('comboText').textContent = combo>=2 ? `連続正解 ${combo}！` : '';
+    } else {
+      combo = 0;
+      $('feedback').className = 'feedback show bad';
+      $('feedback').innerHTML = `<strong>不正解。</strong><br>正解は「${q.author}」。<br>${q.trivia.replace(/\\n/g,'<br>')}`;
+      $('comboText').textContent = '';
+    }
+    $('comboValue').textContent = combo;
+    $('scoreValue').textContent = totalScore;
+    $('nextBtn').classList.remove('hidden');
+    $('nextBtn').textContent = currentQuestion===4 ? (currentStage===TOTAL_STAGES-1 ? 'ランキングへ' : 'ステージ結果へ') : '次の問題へ';
+  }
+
+  function showStageResult(){
+    showOnly('stageScreen');
+    $('stageTitle').textContent = `ステージ ${currentStage+1} クリア！`;
+    $('stageScoreText').textContent = `ステージスコア: ${stageScore} / 5`;
+    const comment = stageScore===5 ? '見事です。このステージは完璧。' : stageScore>=4 ? 'かなり鋭いです。' : stageScore>=2 ? '良い調子です。' : 'まだ巻き返せます。';
+    $('stageComment').textContent = `${comment} 現在の総合点は ${totalScore} / ${TOTAL_QUESTIONS} 点です。`;
+  }
+
+  function getRankTitle(){
+    if(totalScore===TOTAL_QUESTIONS) return '全国文豪皇帝';
+    if(totalScore>=45) return '文学殿堂入り';
+    if(totalScore>=38) return '文豪ハンター';
+    if(totalScore>=30) return '近代文学の通';
+    if(totalScore>=20) return '読書家見習い';
+    return '文学の旅人';
+  }
+
+  function buildRanking(){
+    const p = Math.round(totalScore/TOTAL_QUESTIONS*100);
+    $('rankList').innerHTML = [
+      ['文豪スコア',`${totalScore} / ${TOTAL_QUESTIONS}`],
+      ['正答率',`${p}%`],
+      ['連続正解の印象',combo>=5?'連勝マスター':combo>=3?'連勝上手':'堅実派'],
+      ['難問耐性',totalScore>=40?'S':totalScore>=32?'A':totalScore>=24?'B':totalScore>=16?'C':'D'],
+      ['総合ランキング風称号',getRankTitle()]
+    ].map((x,i)=>`<div class="rankItem"><strong>${i+1}位風：</strong> ${x[0]}<br><span class="small">${x[1]}</span></div>`).join('');
+  }
+
+  function showDiagnosis(){
+    const r = totalScore/TOTAL_QUESTIONS;
+    let t='', x='';
+    if(r===1){ t='文学オタク度 100%'; x='完全に文学オタクです。しかもかなり上級。作家名だけでなく、出身地・人物像・作品世界が一体化して頭に入っています。'; }
+    else if(r>=0.84){ t='文学オタク度 90%'; x='かなり強い文学オタクです。有名作家だけでなく、中堅どころや渋い人選にも対応できています。'; }
+    else if(r>=0.68){ t='文学オタク度 75%'; x='相当な読書家タイプです。学校知識を超えて、文豪ごとの雰囲気やジャンル感覚も育っています。'; }
+    else if(r>=0.5){ t='文学オタク度 55%'; x='文学好きとして十分良い線です。有名どころはかなり押さえています。'; }
+    else { t='文学オタク度 30%'; x='これから伸びるタイプです。好きな作家を1人決めて、その周辺人物を広げると世界が一気に広がります。'; }
+    $('diagnosisTitle').textContent = t;
+    $('diagnosisText').textContent = x;
+  }
+
+  function showFinal(){
+    showOnly('finalScreen');
+    $('finalScore').textContent = `最終スコア: ${totalScore} / ${TOTAL_QUESTIONS}`;
+    if(totalCorrect===TOTAL_QUESTIONS){
+      $('finalPraise').innerHTML = 'あなたは全国文豪マスター。<br>もはや歩く文学地図帳。<br>50問完全制覇、本当にすごいです。';
+      $('finalComment').textContent = '難易度つきの50問をすべて正解。文学オタク度は完全体です。';
+    } else if(totalScore>=42){
+      $('finalPraise').textContent = '圧倒的に強いです。文学好きの域を超えています。';
+      $('finalComment').textContent = 'かなりの文豪知識です。ランキング風称号もかなり上位です。';
+    } else if(totalScore>=32){
+      $('finalPraise').textContent = 'かなりすごいです。全国の文豪にだいぶ詳しいです。';
+      $('finalComment').textContent = '難問にもかなり対応できています。';
+    } else if(totalScore>=22){
+      $('finalPraise').textContent = '良い調子です。文豪たちとかなり親しくなってきました。';
+      $('finalComment').textContent = '次は地方別に覚えるとさらに強くなれます。';
+    } else {
+      $('finalPraise').textContent = '挑戦おつかれさまでした。ここから全国文学の旅が始まります。';
+      $('finalComment').textContent = 'まずは漱石、鷗外、太宰、賢治あたりを軸に広げると楽しくなります。';
+    }
+  }
+
+  function next(){
+    if(currentQuestion<4){
+      currentQuestion++;
+      loadQuestion();
+    } else if(currentStage<TOTAL_STAGES-1){
+      showStageResult();
+    } else {
+      showOnly('rankingScreen');
+      buildRanking();
+    }
+  }
+  function nextStage(){
+    currentStage++;
+    currentQuestion = 0;
+    stageScore = 0;
+    showOnly('gameScreen');
+    loadQuestion();
+  }
+  function resetGame(){
+    currentStage = 0;
+    currentQuestion = 0;
+    resetScores();
+    showOnly('startScreen');
+  }
+  function startGame(){
+    currentStage = 0;
+    currentQuestion = 0;
+    resetScores();
+    showOnly('gameScreen');
+    loadQuestion();
+  }
+  function startFromStage(idx){
+    currentStage = idx;
+    currentQuestion = 0;
+    resetScores();
+    showOnly('gameScreen');
+    loadQuestion();
+  }
+
+  $('startBtn').addEventListener('click', startGame);
+  $('restartBtn').addEventListener('click', resetGame);
+  $('stageRestartBtn').addEventListener('click', resetGame);
+  $('playAgainBtn').addEventListener('click', startGame);
+  $('stageNextBtn').addEventListener('click', nextStage);
+  $('toDiagnosisBtn').addEventListener('click', () => { showOnly('diagnosisScreen'); showDiagnosis(); });
+  $('toFinalBtn').addEventListener('click', showFinal);
+  $('nextBtn').addEventListener('click', next);
+  document.querySelectorAll('#stageGridStart .stagePick, #stageGridEnd .stagePick').forEach(btn => {
+    btn.addEventListener('click', () => startFromStage(Number(btn.dataset.stage)));
+  });
+})();
+</script>
+</body>
+</html>
